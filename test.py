@@ -1,14 +1,55 @@
 # SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
 # SPDX-License-Identifier: Apache-2.0
-from code_snapshot import snapshot_files
+import logging
+import warnings
+
+warnings.filterwarnings(
+    "ignore",
+    message=r"pkg_resources is deprecated as an API\..*",
+)
+warnings.filterwarnings(
+    "ignore",
+    message=r"`torch\.cuda\.amp\.GradScaler\(args\.\.\.\)` is deprecated\..*",
+)
+warnings.filterwarnings(
+    "ignore",
+    message=r"Starting from v1\.9\.0, `tensorboardX` has been removed as a dependency.*",
+)
+warnings.filterwarnings(
+    "ignore",
+    message=r"You are using `torch\.load` with `weights_only=False`.*",
+)
+warnings.filterwarnings(
+    "ignore",
+    message=r"predict returned None if it was on purpose, ignore this warning\.\.\.",
+)
+
 from model.config import default_argument_parser, setup
 from lightning.pytorch import seed_everything, Trainer
 from lightning.pytorch.strategies import DDPStrategy
 from lightning.pytorch.callbacks import ModelCheckpoint
+
+
+class _LightningInfoFilter(logging.Filter):
+    def filter(self, record):
+        return "You are using a CUDA device" not in record.getMessage()
+
+
+logging.getLogger("lightning.pytorch.utilities.rank_zero").addFilter(_LightningInfoFilter())
+
 import glob
 import os, sys
 import time
 import torch
+
+MESH_EXTENSIONS = (".obj", ".ply", ".stl", ".off", ".glb", ".gltf")
+
+
+def _count_mesh_files(input_dir):
+    count = 0
+    for _, _, files in os.walk(input_dir):
+        count += sum(filename.lower().endswith(MESH_EXTENSIONS) for filename in files)
+    return count
 
 
 def _resolve_inference_devices(cfg):
@@ -20,7 +61,7 @@ def _resolve_inference_devices(cfg):
         return 1
     if os.path.isdir(input_path):
         try:
-            num_items = len(os.listdir(input_path))
+            num_items = _count_mesh_files(input_path)
             if num_items > 0:
                 return max(1, min(gpu_count, num_items))
         except Exception:

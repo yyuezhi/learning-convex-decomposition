@@ -1,0 +1,53 @@
+### Use train.py instead of train_v2.py
+name: example
+lr: 1e-5
+
+seed: 42
+training_epochs: 100000000
+continue_training: True 
+limit_train_batches: 3000
+ckpt_path: None
+
+save_every_epoch: 1
+triplane_channels_low: 128
+triplane_channels_high: 512
+transformer_dim: 1024
+triplane_resolution: 128
+sdf_n_hidden_layers: 6
+
+num_pos: 64
+num_neg_random: 256
+num_neg_hard_pc: 256
+
+
+dataset:
+  data_type: "objaverse_convex"
+  list_dir: "./configs/data_list/"
+  data_path: ""
+  train_list: train.json
+  val_list: val.json
+  train_batch_size: 2
+  val_batch_size: 2
+  supervision_method: ["convex"]
+  pc_num_pts: 100000
+  num_neg_pairs: 1024
+  num_convex_anchor: 1024
+
+
+loss:
+  sdf: 1.0
+  triplet: 1.0
+  l1: 0.0
+  balance_weight: [["convex",1]]
+
+use_pvcnn: False
+use_pvcnnonly: True
+
+use_2d_feat: False
+pvcnn:
+  point_encoder_type: 'pvcnn'
+  z_triplane_channels: 256
+  z_triplane_resolution: 128
+
+decomp:
+  save_seg: False

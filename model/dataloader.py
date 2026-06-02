@@ -10,6 +10,18 @@ import pymeshlab
 # ---------------------------------------------------------------------
 # helpers
 # ---------------------------------------------------------------------
+MESH_EXTENSIONS = (".obj", ".ply", ".stl", ".off", ".glb", ".gltf")
+
+
+def list_mesh_files(input_dir):
+    mesh_files = []
+    for root, _, files in os.walk(input_dir):
+        for filename in files:
+            if filename.lower().endswith(MESH_EXTENSIONS):
+                mesh_files.append(osp.relpath(osp.join(root, filename), input_dir))
+    return sorted(mesh_files)
+
+
 class ObjaverseConvex(torch.utils.data.Dataset):
     """
     Dataset for Objaverse convex decomposition training and inference.
@@ -366,9 +378,12 @@ class InferenceData(torch.utils.data.Dataset):
             self.data_list = [osp.basename(input_path)]
         elif osp.isdir(input_path):
             self.data_path = input_path
-            self.data_list = os.listdir(self.data_path)
+            self.data_list = list_mesh_files(self.data_path)
         else:
             raise FileNotFoundError(f"dataset.input_path not found: {input_path}")
+
+        if len(self.data_list) == 0:
+            raise FileNotFoundError(f"No mesh files found in dataset.input_path: {input_path}")
 
         print("dataset len:", len(self.data_list))
 

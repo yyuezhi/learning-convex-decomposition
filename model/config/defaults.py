@@ -5,7 +5,7 @@ from yacs.config import CfgNode as CN
 _C = CN()
 _C.seed = 0
 _C.output_dir = "./exp_results"
-_C.result_name = "test_all"
+_C.result_name = "exp_data"
 
 _C.num_pos = 64
 _C.num_neg_random = 256
@@ -83,4 +83,4 @@ _C.decomp.interior_samples = 10000
 _C.decomp.concavity_samples = 6000
 _C.decomp.eps = 0.10
 _C.decomp.max_parts = 100
-_C.decomp.save_seg = True
+_C.decomp.save_seg = False

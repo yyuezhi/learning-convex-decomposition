@@ -46,7 +46,7 @@ def my_voxelization(features, coords, resolution):
     indices = coords[:, 0] * r2 + coords[:, 1] * r + coords[:, 2]
     indices = indices.unsqueeze(dim=1).expand(-1, result.shape[1], -1)
     features = torch.cat([features, torch.ones(features.shape[0], 1, features.shape[2], device=features.device, dtype=features.dtype)], dim=1)
-    out_feature = result.scatter_(index=indices.long(), src=features, dim=2, reduce='add')
+    out_feature = result.scatter_add_(index=indices.long(), src=features, dim=2)
     # import ipdb
     # ipdb.set_trace()  #############
     cnt = out_feature[:, -1:, :]

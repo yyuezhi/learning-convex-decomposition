@@ -540,7 +540,7 @@ class Model(pl.LightningModule):
         n_samples = self.cfg.decomp.concavity_samples
         eps = self.cfg.decomp.eps
         max_parts = self.cfg.decomp.max_parts
-        save_seg = bool(getattr(self.cfg.decomp, "save_seg", True))
+        save_seg = bool(getattr(self.cfg.decomp, "save_seg", False))
         # Lightning predict batch sometimes comes with extra dims
         batch["pc"] = batch["pc"][0].reshape(1, -1, 3)
         N = batch["pc"].shape[0]
